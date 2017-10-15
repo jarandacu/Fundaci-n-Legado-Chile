@@ -50,5 +50,14 @@ important therefore, that if you are using the RH_RF95 driver with another
 SPI based deviced, that you disable interrupts while you transfer data to
 and from that other device.  Use cli() to disable interrupts and sei() to
 reenable them.
-
+14.Transmitter Power
+You can control the transmitter power on the RF transceiver
+with the RH_RF95::setTxPower() function. The argument can be any of
++5 to +23 (for modules that use PA_BOOST)
+-1 to +14 (for modules that use RFO transmitter pin)
+The default is 13. Eg:
+\code
+driver.setTxPower(10); // use PA_BOOST transmitter pin
+driver.setTxPower(10, true); // use PA_RFO pin transmitter pin
+\endcode
   
