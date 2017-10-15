@@ -12,7 +12,6 @@
 #define RFM95_CS 10
 #define RFM95_RST 9
 #define RFM95_INT 2
-
 // Change to 434.0 or other frequency, must match RX's freq!
 #define RF95_FREQ 915.0
 
@@ -55,12 +54,18 @@ void setup()
   // If you are using RFM95/96/97/98 modules which uses the PA_BOOST transmitter pin, then 
   // you can set transmitter powers from 5 to 23 dBm:
   rf95.setTxPower(23, false);
-}
+  rf95.setTxPower(14, true);
+  rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
+  // Queda pendiente asignar una variable como entrada a la funcion.
+
+  
+ }
 
 int16_t packetnum = 0;  // packet counter, we increment per xmission
 
 void loop()
 {
+  rf95.printRegisters();
   Serial.println("Sending to rf95_server");
   // Send a message to rf95_server
   
