@@ -1,0 +1,54 @@
+1. datagrams of arbitrary length to 251 octets per packet.
+2. For any 2 radios to communicate that must be configured to use the same frequency and modulation scheme.
+3. Frequency can be set with 61Hz precision to any frequency from 240.0MHz to 960.0MHz.
+4. Up to 2 modules can be connected to an Arduino (3 on a Mega), permitting the construction of translators and frequency changers
+5. Support for other features such as transmitter power control etc is also provided.
+6. All messages sent and received by this RH_RF95 Driver conform to this packet format:
+ - LoRa mode:
+ - 8 symbol PREAMBLE
+ - Explicit header with header CRC (handled internally by the radio)
+ - 4 octets HEADER: (TO, FROM, ID, FLAGS)
+ - 0 to 251 octets DATA 
+ - CRC (handled internally by the radio)
+ 7. You can connect a Modtronix inAir4 or inAir9 directly to a 3.3V part such as a Teensy 3.1 like this (tested).
+
+                 Teensy      inAir4 inAir9
+                 GND----------GND   (ground in)
+                 3V3----------3.3V  (3.3V in)
+ interrupt 0 pin D2-----------D00   (interrupt request out)
+          SS pin D10----------CS    (CS chip select in)
+         SCK pin D13----------CK    (SPI clock in)
+        MOSI pin D11----------SI    (SPI Data in)
+        MISO pin D12----------SO    (SPI Data out)
+you must also set the transmitter power with useRFO: driver.setTxPower(13, true);
+8. Note that if you are using Modtronix inAir4 or inAir9,or any other module which uses the transmitter RFO pins 
+and not the PA_BOOST pins that you must configure the power transmitter power for -1 to 14 dBm and with useRFO true. 
+Failure to do that will result in extremely low transmit powers.
+9.Slave Select is pin 10, interrupt is Pin 3: RH_RF95 driver(10, 3);
+10.  The name of the serial port on that board is 'SerialUSB', not 'Serial', so this may be helpful at the top of our
+sample sketches:
+\code
+#define Serial SerialUSB
+\endcode
+11. It is possible to have 2 or more radios connected to one Arduino, provided each radio has its own SS and interrupt
+line (SCK, SDI and SDO are common to all radios)
+12. Caution: Power supply requirements of the RFM module may be relevant in some circumstances: 
+RFM95/96/97/98 modules are capable of pulling 120mA+ at full power, where Arduino's 3.3V line can
+give 50mA. You may need to make provision for alternate power supply for
+the RFM module, especially if you wish to use full transmit power, and/or you have
+other shields demanding power. Inadequate power for the RFM is likely to cause symptoms such as:
+- reset's/bootups terminate with "init failed" messages
+- random termination of communication after 5-30 packets sent/received
+- "fake ok" state, where initialization passes fluently, but communication doesn't happen
+- shields hang Arduino boards, especially during the flashing
+13.\par Interrupts
+The RH_RF95 driver uses interrupts to react to events in the RFM module,
+such as the reception of a new packet, or the completion of transmission
+of a packet.  The RH_RF95 driver interrupt service routine reads status from
+and writes data to the the RFM module via the SPI interface. It is very
+important therefore, that if you are using the RH_RF95 driver with another
+SPI based deviced, that you disable interrupts while you transfer data to
+and from that other device.  Use cli() to disable interrupts and sei() to
+reenable them.
+
+  
